@@ -34,18 +34,16 @@ export default function Home() {
     <main className="flex h-dvh flex-col items-center justify-center p-4 relative overflow-hidden bg-transparent">
       
       {mounted && (
-        <>
-          <div className="absolute top-6 left-6 z-50">
-            <TeamRoom roomId={roomId} />
-          </div>
+        <header className="absolute top-6 left-6 right-6 flex justify-between items-center z-50">
+          <TeamRoom roomId={roomId} />
           <button
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="absolute top-6 right-6 p-2 rounded-full border border-foreground/10 bg-foreground/5 text-foreground/50 hover:text-foreground hover:bg-foreground/10 transition-all focus-visible:ring-2 focus-visible:ring-foreground/50 focus-visible:outline-none backdrop-blur-md"
+            className="p-2 rounded-full border border-foreground/10 bg-foreground/5 text-foreground/50 hover:text-foreground hover:bg-foreground/10 transition-all focus-visible:ring-2 focus-visible:ring-foreground/50 focus-visible:outline-none backdrop-blur-md"
             aria-label="Toggle Theme"
           >
             {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
-        </>
+        </header>
       )}
 
       <LayoutGroup>

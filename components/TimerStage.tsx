@@ -332,12 +332,12 @@ export const TimerStage = () => {
       className="relative flex flex-col items-center justify-center p-8 mt-4"
       onFocusCapture={() => setIsIdle(false)}
     >
-      {/* Escape Hatch: Cancel Sprint */}
+      {/* Escape Hatch: Restart */}
       <button
         onClick={() => resetSprint()}
         className="absolute top-0 left-0 text-[10px] uppercase tracking-widest text-foreground/60 hover:text-foreground px-3 py-1.5 border border-foreground/10 hover:border-foreground/30 rounded-full transition-all bg-foreground/5 hover:bg-foreground/10 z-50 backdrop-blur-md"
       >
-        ← Cancel Sprint
+        ← Restart
       </button>
 
       {/* Overall Sprint Progress Line */}

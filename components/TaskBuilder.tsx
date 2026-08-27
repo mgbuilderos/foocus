@@ -12,6 +12,7 @@ export const TaskBuilder = () => {
   const [step, setStep] = useState<WizardStep>('GOAL');
   const [mainGoal, setMainGoal] = useState('');
   const [subtaskTitle, setSubtaskTitle] = useState('');
+  const [subtaskDuration, setSubtaskDuration] = useState('25');
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
 
   const placeholders = [
@@ -46,10 +47,12 @@ export const TaskBuilder = () => {
   const handleAddSubtask = (e: React.FormEvent) => {
     e.preventDefault();
     if (!subtaskTitle.trim()) return;
+    const dur = parseInt(subtaskDuration, 10);
+    if (isNaN(dur) || dur <= 0) return;
     
     const mainTaskId = tasks[0]?.id;
     if (mainTaskId) {
-      addSubtask(mainTaskId, { title: subtaskTitle, durationSec: 25 * 60 });
+      addSubtask(mainTaskId, { title: subtaskTitle, durationSec: dur * 60 });
       setSubtaskTitle('');
     }
   };
@@ -173,22 +176,22 @@ export const TaskBuilder = () => {
                   className="flex-1 bg-transparent border-0 outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 rounded-lg text-foreground placeholder:text-foreground/30 font-sans px-2 py-2"
                   autoFocus
                 />
-                <div className="flex shrink-0 gap-1 pr-2">
-                  {[15, 25, 45].map(m => (
-                    <button 
-                      key={m}
-                      type="button"
-                      onClick={() => {
-                        if (mainTask && subtaskTitle.trim()) {
-                          addSubtask(mainTask.id, { title: subtaskTitle, durationSec: m * 60 });
-                          setSubtaskTitle('');
-                        }
-                      }}
-                      className="neu-flat text-[10px] uppercase tracking-widest text-foreground/70 hover:text-foreground px-2 py-1.5 rounded-lg transition-colors focus-visible:outline-none"
-                    >
-                      +{m}m
-                    </button>
-                  ))}
+                <div className="flex shrink-0 items-center gap-1 pr-2">
+                  <input
+                    type="number"
+                    value={subtaskDuration}
+                    onChange={(e) => setSubtaskDuration(e.target.value)}
+                    min="1"
+                    className="w-16 bg-transparent border-0 outline-none focus:outline-none focus:ring-0 text-foreground font-sans text-right px-1 py-2 text-sm"
+                    aria-label="Subtask Duration (minutes)"
+                  />
+                  <span className="text-foreground/50 text-sm mr-2">m</span>
+                  <button 
+                    type="submit"
+                    className="neu-flat text-[10px] uppercase tracking-widest text-foreground/70 hover:text-foreground px-3 py-2 rounded-lg transition-colors focus-visible:outline-none"
+                  >
+                    Add
+                  </button>
                 </div>
               </form>
 
@@ -222,8 +225,11 @@ export const TaskBuilder = () => {
                 onClick={(e) => {
                   // If there is text in the input but they clicked Continue, auto-add it first
                   if (subtaskTitle.trim() && mainTask) {
-                    addSubtask(mainTask.id, { title: subtaskTitle, durationSec: 25 * 60 });
-                    setSubtaskTitle('');
+                    const dur = parseInt(subtaskDuration, 10);
+                    if (!isNaN(dur) && dur > 0) {
+                      addSubtask(mainTask.id, { title: subtaskTitle, durationSec: dur * 60 });
+                      setSubtaskTitle('');
+                    }
                   }
                   setStep('READY');
                 }}
