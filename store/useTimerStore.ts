@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { playTransitionChime, playCompletionPulse, setMuted } from '@/lib/sound';
+import { saveSession } from '@/lib/telemetry';
 
 export type SubTask = {
   id: string;
@@ -125,9 +126,23 @@ export const useTimerStore = create<TimerStore>()(
       setMode: (mode) => set({ mode }),
       setTasks: (tasks) => set({ tasks }),
       resetSprint: () => {
+        const { state: currentState, tasks } = get();
         if (breathingTimeout) {
           clearTimeout(breathingTimeout);
           breathingTimeout = null;
+        }
+        // Record abandoned session if sprint was active
+        if (currentState !== 'IDLE' && tasks.length > 0) {
+          try {
+            const totalDurationSec = tasks.reduce((s, t) => s + t.durationSec, 0);
+            saveSession({
+              startedAt: new Date(Date.now() - totalDurationSec * 1000).toISOString(),
+              completedAt: new Date().toISOString(),
+              totalDurationSec,
+              tasks: tasks.map(t => ({ title: t.title, durationSec: t.durationSec, completed: t.completed })),
+              status: currentState === 'FINISHED' ? 'completed' : 'abandoned',
+            });
+          } catch { /* telemetry should never crash the app */ }
         }
         set({
           state: 'IDLE',
@@ -291,6 +306,16 @@ export const useTimerStore = create<TimerStore>()(
       });
     } else {
       playCompletionPulse();
+      try {
+        const totalDurationSec = updatedTasks.reduce((s, t) => s + t.durationSec, 0);
+        saveSession({
+          startedAt: new Date(Date.now() - totalDurationSec * 1000).toISOString(),
+          completedAt: new Date().toISOString(),
+          totalDurationSec,
+          tasks: updatedTasks.map(t => ({ title: t.title, durationSec: t.durationSec, completed: t.completed })),
+          status: 'completed',
+        });
+      } catch { /* telemetry should never crash the app */ }
       set({
         tasks: updatedTasks,
         state: 'FINISHED',
@@ -389,6 +414,16 @@ export const useTimerStore = create<TimerStore>()(
       });
     } else {
       playCompletionPulse();
+      try {
+        const totalDurationSec = updatedTasks.reduce((s, t) => s + t.durationSec, 0);
+        saveSession({
+          startedAt: new Date(Date.now() - totalDurationSec * 1000).toISOString(),
+          completedAt: new Date().toISOString(),
+          totalDurationSec,
+          tasks: updatedTasks.map(t => ({ title: t.title, durationSec: t.durationSec, completed: t.completed })),
+          status: 'completed',
+        });
+      } catch { /* telemetry should never crash the app */ }
       set({
         tasks: updatedTasks,
         state: 'FINISHED',
