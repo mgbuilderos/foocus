@@ -140,7 +140,7 @@ export const ProgressVisualizer: React.FC<ProgressVisualizerProps> = ({ mode, pr
 
   if (mode === 'SPACE') {
     return (
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-transparent">
+      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden bg-transparent">
         <div className="absolute inset-0">
           {stars.map((star) => (
             <motion.div 
@@ -224,7 +224,7 @@ export const ProgressVisualizer: React.FC<ProgressVisualizerProps> = ({ mode, pr
 
   if (mode === 'MOUNTAIN') {
     return (
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-transparent">
+      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden bg-transparent">
         {/* High-End Dynamic Wireframe Mountains */}
         <div className="absolute bottom-0 w-full h-[40vh]">
           <svg 
@@ -269,9 +269,9 @@ export const ProgressVisualizer: React.FC<ProgressVisualizerProps> = ({ mode, pr
 
   if (mode === 'RACE') {
     return (
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-transparent">
+      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden bg-transparent">
         {/* Minimalist Abstract Track */}
-        <div className="absolute bottom-[10%] left-0 w-full h-32 border-y border-foreground/10 flex flex-col justify-evenly opacity-50">
+        <div className="absolute bottom-8 left-0 w-full h-32 border-y border-foreground/10 flex flex-col justify-evenly opacity-50">
           <div className="w-full h-[1px] border-b border-dashed border-foreground/20" />
           <div className="w-full h-[1px] border-b border-dashed border-foreground/20" />
           <div className="w-full h-[1px] border-b border-dashed border-foreground/20" />
@@ -287,7 +287,7 @@ export const ProgressVisualizer: React.FC<ProgressVisualizerProps> = ({ mode, pr
 
         {/* The Runner: Sleek SVG Runner */}
         <motion.div
-          className="absolute bottom-[10%] mb-12 z-10"
+          className="absolute bottom-8 mb-12 z-10"
           initial={{ left: "5%" }}
           animate={{ left: `calc(5% + ${progress * 90}%)` }}
           transition={{ ease: "linear", duration: 1 }}

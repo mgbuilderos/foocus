@@ -34,12 +34,12 @@ export default function Home() {
     <main className="flex h-dvh flex-col items-center justify-center p-4 relative overflow-hidden bg-transparent">
       
       {mounted && (
-        <header className="absolute top-6 left-0 w-full px-6 flex justify-between items-center z-50">
-          <TeamRoom roomId={roomId} />
+        <header className="absolute top-6 left-0 w-full px-6 flex justify-between items-start z-50 h-10">
+          <div className="flex items-center h-[32px]"><TeamRoom roomId={roomId} /></div>
           <button
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             className="p-2 rounded-full border border-foreground/10 bg-foreground/5 text-foreground/50 hover:text-foreground hover:bg-foreground/10 transition-all focus-visible:ring-2 focus-visible:ring-foreground/50 focus-visible:outline-none backdrop-blur-md"
-            aria-label="Toggle Theme"
+            aria-label="Toggle Theme" style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}
           >
             {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
@@ -47,14 +47,14 @@ export default function Home() {
       )}
 
       <LayoutGroup>
-        <motion.div layout className="z-10 w-full max-w-2xl flex flex-col items-center h-full max-h-[850px] pt-12">
+        <motion.div layout className="z-10 w-full flex flex-col items-center h-full max-h-[850px] pt-12">
           
           <motion.header layout className="mb-12 text-center shrink-0 w-full flex flex-col items-center">
             <h1 className="text-7xl font-medium tracking-[0.2em] text-foreground">FOOCUS</h1>
             <p className="text-[9px] uppercase tracking-[0.4em] text-foreground/40 mt-3">Frictionless Focus</p>
           </motion.header>
 
-          <div className="flex-1 w-full flex flex-col justify-center min-h-0 z-10 pb-20">
+          <div className="flex-1 w-full flex flex-col justify-center min-h-0 z-10">
             <TaskBuilder />
             <TimerStage />
           </div>
