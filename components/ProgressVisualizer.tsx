@@ -28,11 +28,17 @@ export const ProgressVisualizer: React.FC<ProgressVisualizerProps> = ({ mode, pr
 
   // MOUNTAIN: Escalating Multi-peak generation with centered single peak
   const { mountainPath, climberX, climberY } = useMemo(() => {
+    // Ensure the timeline spans the full width (0 to 1) perfectly without cutting off flatly
+    const timeline = [...safeTimeline];
+    if (timeline.length > 0 && timeline[timeline.length - 1] < 1) {
+      timeline[timeline.length - 1] = 1;
+    }
+
     let mPath = "0,100 ";
-    const numTasks = safeTimeline.length;
+    const numTasks = timeline.length;
     
-    safeTimeline.forEach((p, i) => {
-      const prev = i === 0 ? 0 : safeTimeline[i-1];
+    timeline.forEach((p, i) => {
+      const prev = i === 0 ? 0 : timeline[i-1];
       // If only 1 task, center the peak at 50%
       const peakX = numTasks === 1 ? 0.5 : prev + (p - prev) / 2;
       const peakY = numTasks === 1 ? 60 : 90 - ((i + 1) / numTasks) * 40; 
@@ -43,18 +49,18 @@ export const ProgressVisualizer: React.FC<ProgressVisualizerProps> = ({ mode, pr
     let cX = progress * 100;
     let cY = 100;
     
-    let currentTaskIdx = safeTimeline.findIndex(p => progress <= p);
-    if (currentTaskIdx === -1) currentTaskIdx = safeTimeline.length - 1;
+    let currentTaskIdx = timeline.findIndex(p => progress <= p);
+    if (currentTaskIdx === -1) currentTaskIdx = timeline.length - 1;
     if (currentTaskIdx === -1) currentTaskIdx = 0;
     
-    const p = safeTimeline[currentTaskIdx];
-    const prev = currentTaskIdx === 0 ? 0 : safeTimeline[currentTaskIdx - 1];
+    const p = timeline[currentTaskIdx];
+    const prev = currentTaskIdx === 0 ? 0 : timeline[currentTaskIdx - 1];
     
     const peakX = numTasks === 1 ? 0.5 : prev + (p - prev) / 2;
-    const startY = currentTaskIdx === 0 ? 100 : 100;
+    const startY = 100;
     const peakY = numTasks === 1 ? 60 : 90 - ((currentTaskIdx + 1) / numTasks) * 40; 
 
-    if (progress < peakX) {
+    if (progress <= peakX) {
         const seg = (progress - prev) / (peakX - prev || 1);
         cY = startY - (seg * (startY - peakY));
     } else {
@@ -65,13 +71,85 @@ export const ProgressVisualizer: React.FC<ProgressVisualizerProps> = ({ mode, pr
     return { mountainPath: mPath, climberX: cX, climberY: cY };
   }, [progress, safeTimeline]);
 
-  // SPACE: Planet Data with realistic radial gradients and rotation
+  // SPACE: Planet Data with highly detailed inline SVGs
   const planets = [
-    { size: 28, bg: "radial-gradient(circle at 40% 40%, rgba(34,139,34,0.6) 10%, transparent 30%), radial-gradient(circle at 70% 60%, rgba(34,139,34,0.5) 15%, transparent 35%), radial-gradient(circle at 30% 30%, #4b6cb7 0%, #182848 80%, #0a1128 100%)", shadow: "rgba(75,108,183,0.4)" },
-    { size: 40, bg: "radial-gradient(circle at 25% 25%, rgba(0,0,0,0.3) 5%, transparent 10%), radial-gradient(circle at 60% 40%, rgba(0,0,0,0.25) 8%, transparent 15%), radial-gradient(circle at 45% 75%, rgba(0,0,0,0.35) 6%, transparent 12%), radial-gradient(circle at 30% 30%, #a8b0c3 0%, #4a5568 80%, #2a303c 100%)", shadow: "rgba(168,176,195,0.3)" },
-    { size: 52, bg: "radial-gradient(circle at 30% 30%, #c05e46 0%, #5a1e12 80%, #2d0f09 100%)", shadow: "rgba(192,94,70,0.4)" },
-    { size: 68, bg: "radial-gradient(circle at 30% 30%, #d4a373 0%, #8a5a44 80%, #452d22 100%)", shadow: "rgba(212,163,115,0.3)" },
-    { size: 44, bg: "radial-gradient(circle at 30% 30%, #e9c46a 0%, #8c6d31 80%, #463618 100%)", shadow: "rgba(233,196,106,0.3)" }
+    { size: 36, content: (
+        <svg viewBox="0 0 100 100" className="w-full h-full rounded-full">
+          <defs>
+            <radialGradient id="earthGlow" cx="30%" cy="30%" r="70%">
+              <stop offset="0%" stopColor="#3b82f6" />
+              <stop offset="70%" stopColor="#1e3a8a" />
+              <stop offset="100%" stopColor="#020617" />
+            </radialGradient>
+          </defs>
+          <circle cx="50" cy="50" r="50" fill="url(#earthGlow)" />
+          <path fill="#15803d" opacity="0.85" d="M 15 35 Q 30 15, 55 25 T 85 45 Q 95 70, 75 85 T 30 90 Q 5 75, 15 35 Z" />
+          <path fill="#166534" opacity="0.7" d="M 10 50 Q 25 40, 45 65 T 20 85 Q 0 65, 10 50 Z" />
+          <path fill="white" opacity="0.4" d="M 5 25 Q 25 10, 50 35 T 95 30 Q 100 50, 75 55 T 25 50 Q 0 40, 5 25 Z" />
+        </svg>
+    )},
+    { size: 44, content: (
+        <svg viewBox="0 0 100 100" className="w-full h-full rounded-full">
+          <defs>
+            <radialGradient id="moonGlow" cx="30%" cy="30%" r="70%">
+              <stop offset="0%" stopColor="#e5e7eb" />
+              <stop offset="70%" stopColor="#9ca3af" />
+              <stop offset="100%" stopColor="#374151" />
+            </radialGradient>
+          </defs>
+          <circle cx="50" cy="50" r="50" fill="url(#moonGlow)" />
+          <circle cx="35" cy="35" r="12" fill="#6b7280" opacity="0.5" />
+          <circle cx="32" cy="32" r="8" fill="#4b5563" opacity="0.4" />
+          <circle cx="70" cy="55" r="16" fill="#6b7280" opacity="0.5" />
+          <circle cx="68" cy="52" r="10" fill="#4b5563" opacity="0.4" />
+          <circle cx="45" cy="75" r="10" fill="#6b7280" opacity="0.5" />
+          <circle cx="85" cy="25" r="8" fill="#6b7280" opacity="0.5" />
+        </svg>
+    )},
+    { size: 54, content: (
+        <svg viewBox="0 0 100 100" className="w-full h-full rounded-full">
+          <defs>
+            <radialGradient id="marsGlow" cx="30%" cy="30%" r="70%">
+              <stop offset="0%" stopColor="#f97316" />
+              <stop offset="70%" stopColor="#9a3412" />
+              <stop offset="100%" stopColor="#431407" />
+            </radialGradient>
+          </defs>
+          <circle cx="50" cy="50" r="50" fill="url(#marsGlow)" />
+          <path fill="#7c2d12" opacity="0.6" d="M 15 45 Q 35 25, 65 40 T 90 65 Q 70 90, 40 80 T 15 45 Z" />
+          <circle cx="40" cy="40" r="14" fill="#7c2d12" opacity="0.5" />
+          <circle cx="75" cy="65" r="12" fill="#7c2d12" opacity="0.4" />
+        </svg>
+    )},
+    { size: 70, content: (
+        <svg viewBox="0 0 100 100" className="w-full h-full rounded-full">
+          <defs>
+            <radialGradient id="jupiterGlow" cx="30%" cy="30%" r="70%">
+              <stop offset="0%" stopColor="#fcd34d" />
+              <stop offset="70%" stopColor="#b45309" />
+              <stop offset="100%" stopColor="#78350f" />
+            </radialGradient>
+          </defs>
+          <circle cx="50" cy="50" r="50" fill="url(#jupiterGlow)" />
+          <path fill="#d97706" opacity="0.7" d="M 2 30 Q 50 25, 98 30 L 99 45 Q 50 40, 1 45 Z" />
+          <path fill="#f59e0b" opacity="0.6" d="M 0 55 Q 50 50, 100 55 L 98 70 Q 50 65, 2 70 Z" />
+          <circle cx="65" cy="62" r="12" fill="#92400e" opacity="0.8" />
+        </svg>
+    )},
+    { size: 48, content: (
+        <svg viewBox="0 0 100 100" className="w-full h-full rounded-full">
+          <defs>
+            <radialGradient id="neptuneGlow" cx="30%" cy="30%" r="70%">
+              <stop offset="0%" stopColor="#38bdf8" />
+              <stop offset="70%" stopColor="#0369a1" />
+              <stop offset="100%" stopColor="#082f49" />
+            </radialGradient>
+          </defs>
+          <circle cx="50" cy="50" r="50" fill="url(#neptuneGlow)" />
+          <path fill="#0284c7" opacity="0.5" d="M 5 40 Q 50 35, 95 40 L 98 55 Q 50 50, 2 55 Z" />
+          <path fill="white" opacity="0.2" d="M 15 65 Q 40 55, 75 60 T 85 75 Q 50 65, 15 65 Z" />
+        </svg>
+    )}
   ];
 
   if (mode === 'SPACE') {
@@ -81,7 +159,7 @@ export const ProgressVisualizer: React.FC<ProgressVisualizerProps> = ({ mode, pr
           {stars.map((star) => (
             <motion.div 
               key={star.id}
-              className="absolute bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)]"
+              className="absolute bg-foreground rounded-full shadow-[0_0_8px_currentColor]"
               style={{ width: star.size, height: star.size, left: `${star.left}%`, top: `${star.top}%` }}
               animate={{ opacity: [star.opacity * 0.2, star.opacity, star.opacity * 0.2] }}
               transition={{ repeat: Infinity, duration: star.duration, ease: "easeInOut" }}
@@ -91,22 +169,23 @@ export const ProgressVisualizer: React.FC<ProgressVisualizerProps> = ({ mode, pr
 
         {/* Linear Interplanetary Journey Track */}
         <div className="absolute bottom-16 left-0 w-full flex flex-col justify-center opacity-90">
-          <div className="w-full h-[1px] border-b border-dashed border-foreground/10 absolute top-1/2 -translate-y-1/2" />
+          <div className="w-full h-[1px] border-b border-dashed border-foreground/40 absolute top-1/2 -translate-y-1/2" />
           
           {/* Earth (Start) */}
           <motion.div 
-            className="absolute top-1/2 -translate-y-1/2 rounded-full border border-black/50" 
+            className="absolute top-1/2 -translate-y-1/2 rounded-full border border-foreground/20 bg-background" 
             style={{ 
               left: '5%', 
               width: planets[0].size, 
               height: planets[0].size, 
               marginLeft: -(planets[0].size/2),
-              background: planets[0].bg,
-              boxShadow: `0 0 25px ${planets[0].shadow}, inset -6px -6px 12px rgba(0,0,0,0.6)`
+              boxShadow: `0 0 20px rgba(var(--foreground),0.2)`
             }}
             animate={{ rotate: 360 }}
             transition={{ repeat: Infinity, duration: 60, ease: "linear" }}
-          />
+          >
+            {planets[0].content}
+          </motion.div>
 
           {/* Destination Planets */}
           {safeTimeline.map((tp, i) => {
@@ -114,18 +193,19 @@ export const ProgressVisualizer: React.FC<ProgressVisualizerProps> = ({ mode, pr
              return (
                <motion.div 
                  key={i} 
-                 className="absolute top-1/2 -translate-y-1/2 rounded-full border border-black/50" 
+                 className="absolute top-1/2 -translate-y-1/2 rounded-full border border-foreground/20 bg-background" 
                  style={{ 
                    left: `calc(5% + ${tp * 90}%)`, 
                    width: planet.size, 
                    height: planet.size, 
                    marginLeft: -(planet.size/2),
-                   background: planet.bg,
-                   boxShadow: `0 0 25px ${planet.shadow}, inset -6px -6px 12px rgba(0,0,0,0.6)`
+                   boxShadow: `0 0 20px rgba(var(--foreground),0.2)`
                  }}
                  animate={{ rotate: 360 }}
                  transition={{ repeat: Infinity, duration: 80 + (i * 20), ease: "linear" }}
-               />
+               >
+                 {planet.content}
+               </motion.div>
              );
           })}
         </div>
@@ -137,18 +217,18 @@ export const ProgressVisualizer: React.FC<ProgressVisualizerProps> = ({ mode, pr
           animate={{ left: `calc(5% + ${progress * 90}%)` }}
           transition={{ ease: "linear", duration: 1 }}
         >
-          <div className="relative flex items-center justify-center -translate-y-1/2 drop-shadow-[0_0_15px_rgba(var(--foreground),0.8)]">
+          <div className="relative flex items-center justify-center -translate-y-1/2 drop-shadow-[0_0_15px_currentColor]">
             <motion.div 
               className="absolute right-[80%] top-1/2 -translate-y-1/2 h-[3px] bg-gradient-to-r from-transparent via-cyan-400 to-white blur-[1px] rounded-full"
               animate={{ width: [30, 50, 30], opacity: [0.6, 1, 0.6] }}
               transition={{ repeat: Infinity, duration: 0.2 }}
             />
-            {/* Realistic Rocket SVG pointing Right */}
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-foreground fill-foreground/10 rotate-45 relative z-10">
-              <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
-              <path d="m12 15-3-3a22 22 0 0 1 3.82-13.82 2.1 2.1 0 0 1 3.82 1.63L16 6l3.5 1.23a2.1 2.1 0 0 1 1.63 3.82A22 22 0 0 1 15 12z"/>
-              <path d="m9 15 2 2"/>
-              <path d="m15 9 2 2"/>
+            {/* Highly detailed Rocket SVG */}
+            <svg width="36" height="36" viewBox="0 0 32 32" fill="none" className="text-foreground rotate-45 relative z-10 drop-shadow-[0_0_8px_currentColor]">
+              <path d="M18.8 4.2C15.6 2 11.2 2 11.2 2s-.5 4.7-1.1 7.1L4.8 11.5c-2.3.9-3.7 2.1-3.7 2.1s2 1.7 5.2 2.7l-3.1 3.1c-1.3 1.3-1.3 3.3 0 4.5 1.3 1.3 3.3 1.3 4.5 0l3.1-3.1c1.1 3.2 2.7 5.2 2.7 5.2s1.2-1.4 2.1-3.7l2.4-5.3c2.4-.6 7.1-1.1 7.1-1.1s0-4.4-2.2-7.6c-2-3-6-4.1-6-4.1z" fill="currentColor" opacity="0.8"/>
+              <path d="M15.5 11c-1.4 0-2.5-1.1-2.5-2.5S14.1 6 15.5 6 18 7.1 18 8.5 16.9 11 15.5 11z" fill="var(--background)" />
+              <path d="M15.5 8.5c-.6 0-1 .4-1 1s.4 1 1 1 1-.4 1-1-.4-1-1-1z" fill="currentColor" />
+              <path d="M8 21.5l-2.5 2.5 1.5 1.5L9.5 23 8 21.5z" fill="currentColor" opacity="0.6"/>
             </svg>
           </div>
         </motion.div>

@@ -18,8 +18,8 @@ export const TimerStage = () => {
   const workerRef = useRef<Worker | null>(null);
   const [isIdle, setIsIdle] = useState(false);
 
-  const [visualizerMode, setVisualizerMode] = useState<'WATCH' | 'SPACE' | 'MOUNTAIN' | 'RACE'>('WATCH');
-  const cycleVisualizerMode = () => setVisualizerMode(p => p === 'WATCH' ? 'SPACE' : p === 'SPACE' ? 'MOUNTAIN' : p === 'MOUNTAIN' ? 'RACE' : 'WATCH');
+  const [visualizerMode, setVisualizerMode] = useState<'WATCH' | 'APPLE' | 'SPACE' | 'MOUNTAIN' | 'RACE'>('WATCH');
+  const cycleVisualizerMode = () => setVisualizerMode(p => p === 'WATCH' ? 'APPLE' : p === 'APPLE' ? 'SPACE' : p === 'SPACE' ? 'MOUNTAIN' : p === 'MOUNTAIN' ? 'RACE' : 'WATCH');
 
 
   useEffect(() => {
@@ -258,7 +258,7 @@ export const TimerStage = () => {
       >
         <div className="absolute inset-0 opacity-30 pointer-events-none -z-10">
            <ProgressVisualizer 
-             mode={visualizerMode} 
+             mode={visualizerMode as any} 
              progress={progress}
              timeString={formatTime(totalRemainingSec)}
              taskTitle={currentTask?.title || 'FOCUS'}
@@ -355,9 +355,9 @@ export const TimerStage = () => {
         />
       </div>
 
-      {visualizerMode !== 'WATCH' && (
+      {visualizerMode !== 'WATCH' && visualizerMode !== 'APPLE' && (
         <ProgressVisualizer 
-          mode={visualizerMode} 
+          mode={visualizerMode as any} 
           progress={progress} 
           timeString={formatTime(totalRemainingSec)}
           taskTitle={currentTask?.title || 'FOCUS'}
@@ -395,6 +395,7 @@ export const TimerStage = () => {
           aria-label={`Toggle Visualizer Mode (Current: ${visualizerMode.toLowerCase()})`}
         >
           {visualizerMode === 'WATCH' && <><Watch className="w-3 h-3" /> <span>Classic</span></>}
+          {visualizerMode === 'APPLE' && <><Watch className="w-3 h-3" /> <span>Apple</span></>}
           {visualizerMode === 'SPACE' && <><Rocket className="w-3 h-3" /> <span>Starship</span></>}
           {visualizerMode === 'MOUNTAIN' && <><Mountain className="w-3 h-3" /> <span>Mountain</span></>}
           {visualizerMode === 'RACE' && <><Flag className="w-3 h-3" /> <span>Race</span></>}
@@ -405,10 +406,10 @@ export const TimerStage = () => {
       <div className="absolute inset-0 bg-foreground/5 blur-[100px] rounded-full pointer-events-none" />
       
       {/* Clock Area - Only occupy space in WATCH mode */}
-      {visualizerMode === 'WATCH' ? (
+      {visualizerMode === 'WATCH' || visualizerMode === 'APPLE' ? (
         <div className="relative w-64 h-64 sm:w-80 sm:h-80 flex items-center justify-center z-10 pointer-events-none">
           <div className="pointer-events-auto">
-            <AnalogueClock remainingSec={totalRemainingSec} totalSec={totalSprintDuration} />
+            <AnalogueClock remainingSec={totalRemainingSec} totalSec={totalSprintDuration} mode={visualizerMode} />
           </div>
         </div>
       ) : (
