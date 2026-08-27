@@ -18,8 +18,8 @@ export const TimerStage = () => {
   const workerRef = useRef<Worker | null>(null);
   const [isIdle, setIsIdle] = useState(false);
 
-  const [visualizerMode, setVisualizerMode] = useState<'WATCH' | 'APPLE' | 'SPACE' | 'MOUNTAIN' | 'RACE'>('WATCH');
-  const cycleVisualizerMode = () => setVisualizerMode(p => p === 'WATCH' ? 'APPLE' : p === 'APPLE' ? 'SPACE' : p === 'SPACE' ? 'MOUNTAIN' : p === 'MOUNTAIN' ? 'RACE' : 'WATCH');
+  const [visualizerMode, setVisualizerMode] = useState<'WATCH' | 'SPACE' | 'MOUNTAIN' | 'RACE'>('WATCH');
+  const cycleVisualizerMode = () => setVisualizerMode(p => p === 'WATCH' ? 'SPACE' : p === 'SPACE' ? 'MOUNTAIN' : p === 'MOUNTAIN' ? 'RACE' : 'WATCH');
 
 
   useEffect(() => {
@@ -329,7 +329,7 @@ export const TimerStage = () => {
       layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative flex flex-col items-center justify-center p-8 mt-4"
+      className="relative flex flex-col items-center justify-center p-8 flex-1 h-full w-full"
       onFocusCapture={() => setIsIdle(false)}
     >
       {/* Escape Hatch: Restart */}
@@ -355,7 +355,7 @@ export const TimerStage = () => {
         />
       </div>
 
-      {visualizerMode !== 'WATCH' && visualizerMode !== 'APPLE' && (
+      {visualizerMode !== 'WATCH' && (
         <ProgressVisualizer 
           mode={visualizerMode as any} 
           progress={progress} 
@@ -395,7 +395,6 @@ export const TimerStage = () => {
           aria-label={`Toggle Visualizer Mode (Current: ${visualizerMode.toLowerCase()})`}
         >
           {visualizerMode === 'WATCH' && <><Watch className="w-3 h-3" /> <span>Classic</span></>}
-          {visualizerMode === 'APPLE' && <><Watch className="w-3 h-3" /> <span>Apple</span></>}
           {visualizerMode === 'SPACE' && <><Rocket className="w-3 h-3" /> <span>Starship</span></>}
           {visualizerMode === 'MOUNTAIN' && <><Mountain className="w-3 h-3" /> <span>Mountain</span></>}
           {visualizerMode === 'RACE' && <><Flag className="w-3 h-3" /> <span>Race</span></>}
@@ -405,30 +404,31 @@ export const TimerStage = () => {
       {/* Ambient Glow */}
       <div className="absolute inset-0 bg-foreground/5 blur-[100px] rounded-full pointer-events-none" />
       
-      {/* Clock Area - Only occupy space in WATCH mode */}
-      {visualizerMode === 'WATCH' || visualizerMode === 'APPLE' ? (
-        <div className="relative w-64 h-64 sm:w-80 sm:h-80 flex items-center justify-center z-10 pointer-events-none">
-          <div className="pointer-events-auto">
-            <AnalogueClock remainingSec={totalRemainingSec} totalSec={totalSprintDuration} mode={visualizerMode} />
+      <div className="flex flex-col items-center justify-center flex-1 w-full gap-8">
+        {/* Clock Area - Only occupy space in WATCH mode */}
+        {visualizerMode === 'WATCH' ? (
+          <div className="relative w-64 h-64 sm:w-80 sm:h-80 flex items-center justify-center z-10 pointer-events-none">
+            <div className="pointer-events-auto">
+              <AnalogueClock remainingSec={totalRemainingSec} totalSec={totalSprintDuration} />
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="relative w-full flex flex-col items-center justify-center z-10 pointer-events-none mt-4 mb-2">
-          <h1 className="text-6xl sm:text-7xl font-sans text-foreground font-light tracking-widest opacity-90">
-            {formatTime(totalRemainingSec)}
-          </h1>
-          <p className="text-foreground/50 text-[10px] sm:text-xs uppercase tracking-[0.3em] mt-2">
-            {currentTask?.title || 'FOCUS'}
-          </p>
-        </div>
-      )}
+        ) : (
+          <div className="relative w-full flex flex-col items-center justify-center z-10 pointer-events-none">
+            <h1 className="text-6xl sm:text-7xl font-sans text-foreground font-light tracking-widest opacity-90">
+              {formatTime(totalRemainingSec)}
+            </h1>
+            <p className="text-foreground/50 text-[10px] sm:text-xs uppercase tracking-[0.3em] mt-2">
+              {currentTask?.title || 'FOCUS'}
+            </p>
+          </div>
+        )}
 
-      {/* Controls */}
-      <motion.div 
-        animate={{ opacity: state === 'RUNNING' && isIdle ? 0.1 : 1 }}
-        transition={{ duration: 1 }}
-        className="mt-2 sm:mt-6 flex items-center space-x-4 z-10 h-16"
-      >
+        {/* Controls */}
+        <motion.div 
+          animate={{ opacity: state === 'RUNNING' && isIdle ? 0.1 : 1 }}
+          transition={{ duration: 1 }}
+          className="flex items-center space-x-4 z-10 h-16"
+        >
         <AnimatePresence>
           {state === 'RUNNING' && (
             <motion.button 
@@ -440,7 +440,7 @@ export const TimerStage = () => {
               aria-label="Add 5 minutes"
             >
               <Plus className="w-4 h-4 mb-1" />
-              <span className="text-[9px] uppercase tracking-wider">5m</span>
+              <span className="text-[9px] uppercase tracking-wider">5 min</span>
             </motion.button>
           )}
         </AnimatePresence>
@@ -481,6 +481,7 @@ export const TimerStage = () => {
           )}
         </AnimatePresence>
       </motion.div>
+      </div>
 
       {/* Upcoming (Only in WATCH mode) */}
       <AnimatePresence>
@@ -496,7 +497,7 @@ export const TimerStage = () => {
               <div className="flex items-center space-x-4 text-foreground/50 text-sm bg-card/30 px-6 py-2 rounded-full border border-foreground/5">
                 <span className="text-[10px] uppercase tracking-widest text-foreground/60">Next</span>
                 <span className="font-sans text-foreground/80 truncate max-w-[200px]">{nextTask.title}</span>
-                <span className="font-mono tabular-nums">{Math.floor(nextTask.durationSec / 60)}m</span>
+                <span className="font-mono tabular-nums">{Math.floor(nextTask.durationSec / 60)} minutes</span>
               </div>
             ) : (
               <div className="text-[10px] uppercase tracking-widest text-foreground/30">

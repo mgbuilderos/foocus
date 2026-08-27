@@ -29,7 +29,7 @@ interface TimerStore {
   endTime: number | null; // The absolute Unix timestamp when the current task should end
   isMuted: boolean;
   isCompactMode: boolean;
-  visualizerMode: 'CLOCK' | 'SPACE' | 'MOUNTAIN' | 'APPLE';
+  visualizerMode: 'CLOCK' | 'SPACE' | 'MOUNTAIN';
   
   // Actions
   toggleMute: () => void;
@@ -89,7 +89,7 @@ export const useTimerStore = create<TimerStore>()(
 
       cycleVisualizerMode: () => {
         set((state) => {
-          const modes: Array<'CLOCK' | 'APPLE' | 'SPACE' | 'MOUNTAIN'> = ['CLOCK', 'APPLE', 'SPACE', 'MOUNTAIN'];
+          const modes: Array<'CLOCK' | 'SPACE' | 'MOUNTAIN'> = ['CLOCK', 'SPACE', 'MOUNTAIN'];
           const currentIndex = modes.indexOf(state.visualizerMode);
           const nextIndex = (currentIndex + 1) % modes.length;
           return { visualizerMode: modes[nextIndex] };

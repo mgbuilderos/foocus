@@ -8,8 +8,7 @@ import { ArrowRight, Plus, X } from 'lucide-react';
 type WizardStep = 'GOAL' | 'SUBTASKS' | 'READY';
 
 export const TaskBuilder = () => {
-  const { tasks, addTask, addSubtask, removeTask, state, setTasks, startSprint } = useTimerStore();
-  const [step, setStep] = useState<WizardStep>('GOAL');
+  const { tasks, addTask, addSubtask, removeTask, state, setTasks, startSprint, wizardStep: step, setWizardStep: setStep } = useTimerStore();
   const [mainGoal, setMainGoal] = useState('');
   const [subtaskTitle, setSubtaskTitle] = useState('');
   const [subtaskDuration, setSubtaskDuration] = useState('25');
@@ -186,7 +185,7 @@ export const TaskBuilder = () => {
                     className="w-16 bg-transparent border-0 outline-none focus:outline-none focus:ring-0 text-foreground font-sans text-right px-1 py-2 text-sm"
                     aria-label="Subtask Duration (minutes)"
                   />
-                  <span className="text-foreground/50 text-sm mr-2">m</span>
+                  <span className="text-foreground/50 text-sm mr-2">minutes</span>
                   <button 
                     type="submit"
                     className="neu-flat text-[10px] uppercase tracking-widest text-foreground/70 hover:text-foreground px-3 py-2 rounded-lg transition-colors focus-visible:outline-none"
@@ -207,7 +206,7 @@ export const TaskBuilder = () => {
                     <span className="text-foreground font-sans">{st.title}</span>
                     <div className="flex items-center space-x-4">
                       <span className="font-mono text-sm text-foreground/50 tabular-nums">
-                        {Math.floor(st.durationSec / 60)}m
+                        {Math.floor(st.durationSec / 60)} minutes
                       </span>
                       <button 
                         onClick={() => removeSubtask(mainTask.id, idx)}
@@ -255,7 +254,7 @@ export const TaskBuilder = () => {
             <div className="text-center space-y-4">
               <h2 className="text-3xl font-sans text-foreground font-light">You are ready.</h2>
               <p className="text-foreground/50 font-sans text-sm">
-                Total focus time: {Math.floor((mainTask?.durationSec || 0) / 60)}m
+                Total focus time: {Math.floor((mainTask?.durationSec || 0) / 60)} minutes
               </p>
             </div>
             
