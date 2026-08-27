@@ -31,7 +31,7 @@ export default function Home() {
   if (!roomId) return null;
 
   return (
-    <main className="flex h-dvh flex-col items-center justify-center p-4 relative overflow-hidden bg-transparent">
+    <main className="flex h-svh flex-col items-center justify-center p-4 relative overflow-hidden bg-transparent">
       
       {mounted && (
         <header className="absolute top-6 left-0 w-full px-6 flex justify-center items-start z-50 h-10 pointer-events-none">
