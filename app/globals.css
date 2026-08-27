@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #e0e5ec;
+    --foreground: #1a1b1f;
+    --card: #e0e5ec;
+    --shadow-light: 9px 9px 16px rgba(163, 177, 198, 0.6), -9px -9px 16px rgba(255, 255, 255, 0.5);
+    --shadow-inset: inset 6px 6px 10px 0 rgba(163, 177, 198, 0.7), inset -6px -6px 10px 0 rgba(255, 255, 255, 0.8);
+    --mesh-bg: radial-gradient(at 0% 0%, #ffffff 0px, transparent 50%),
+               radial-gradient(at 100% 0%, #f0f4f8 0px, transparent 50%),
+               radial-gradient(at 100% 100%, #e1e7ef 0px, transparent 50%),
+               radial-gradient(at 0% 100%, #f8fafd 0px, transparent 50%),
+               #e8edf3;
+  }
+  .dark {
+    --background: #1a1b1f;
+    --foreground: #e0e5ec;
+    --card: #1a1b1f;
+    --shadow-light: 6px 6px 12px rgba(0, 0, 0, 0.6), -6px -6px 12px rgba(55, 58, 64, 0.15);
+    --shadow-inset: inset 4px 4px 8px 0 rgba(0, 0, 0, 0.6), inset -4px -4px 8px 0 rgba(55, 58, 64, 0.2);
+    --mesh-bg: radial-gradient(at 0% 0%, #1f2229 0px, transparent 50%),
+               radial-gradient(at 100% 0%, #15171c 0px, transparent 50%),
+               radial-gradient(at 100% 100%, #0d0f12 0px, transparent 50%),
+               radial-gradient(at 0% 100%, #1a1c22 0px, transparent 50%),
+               #121418;
+  }
+  body {
+    background: var(--mesh-bg);
+    color: var(--foreground);
+    transition: background 0.5s ease, color 0.5s ease;
+  }
+}
+
+.neu-flat {
+  background-color: var(--background);
+  box-shadow: var(--shadow-light);
+}
+
+.dark .neu-flat {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.neu-pressed {
+  background-color: var(--background);
+  box-shadow: var(--shadow-inset);
+}
