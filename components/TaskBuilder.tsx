@@ -158,7 +158,7 @@ export const TaskBuilder = () => {
                 {mainTask?.title}
               </h2>
               <p className="text-sm text-foreground/50 max-w-md mx-auto font-sans leading-relaxed">
-                A massive goal is just a bunch of tiny tasks in a trench coat. Let's unmask them.
+                A massive goal is just a bunch of tiny tasks.
               </p>
             </div>
 
