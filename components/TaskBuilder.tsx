@@ -182,6 +182,7 @@ export const TaskBuilder = () => {
                     value={subtaskDuration}
                     onChange={(e) => setSubtaskDuration(e.target.value)}
                     min="1"
+                    max="120"
                     className="w-16 bg-transparent border-0 outline-none focus:outline-none focus:ring-0 text-foreground font-sans text-right px-1 py-2 text-sm"
                     aria-label="Subtask Duration (minutes)"
                   />

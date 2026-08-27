@@ -34,7 +34,7 @@ export default function Home() {
     <main className="flex h-dvh flex-col items-center justify-center p-4 relative overflow-hidden bg-transparent">
       
       {mounted && (
-        <header className="absolute top-6 left-6 right-6 flex justify-between items-center z-50">
+        <header className="absolute top-6 left-0 w-full px-6 flex justify-between items-center z-50">
           <TeamRoom roomId={roomId} />
           <button
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
