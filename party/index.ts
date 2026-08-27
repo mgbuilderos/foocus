@@ -34,7 +34,11 @@ export default class PlanAndDoServer implements Party.Server {
         case 'START_SPRINT':
         case 'PAUSE_SPRINT':
         case 'FINISH_TASK_EARLY':
+        case 'ROOM_RENAMED':
           // Relay commands to other peers
+          this.room.broadcast(message, [sender.id]);
+          break;
+        default:
           this.room.broadcast(message, [sender.id]);
           break;
       }

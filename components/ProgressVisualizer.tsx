@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { User } from 'lucide-react';
 
 export type VisualizerMode = 'WATCH' | 'SPACE' | 'MOUNTAIN' | 'RACE';
 
@@ -28,47 +29,32 @@ export const ProgressVisualizer: React.FC<ProgressVisualizerProps> = ({ mode, pr
 
   // MOUNTAIN: Escalating Multi-peak generation with centered single peak
   const { mountainPath, climberX, climberY } = useMemo(() => {
-    // Ensure the timeline spans the full width (0 to 1) perfectly without cutting off flatly
-    const timeline = [...safeTimeline];
-    if (timeline.length > 0 && timeline[timeline.length - 1] < 1) {
-      timeline[timeline.length - 1] = 1;
+    const N = Math.max(1, safeTimeline.length);
+    const segWidth = 100 / N;
+    let path = 'M 0,100 ';
+    for(let i=0; i<N; i++) {
+        path += `L ${Number(((i + 0.5) * segWidth).toFixed(2))},40 L ${Number(((i + 1) * segWidth).toFixed(2))},100 `;
     }
 
-    let mPath = "0,100 ";
-    const numTasks = timeline.length;
-    
-    timeline.forEach((p, i) => {
-      const prev = i === 0 ? 0 : timeline[i-1];
-      // If only 1 task, center the peak at 50%
-      const peakX = numTasks === 1 ? 0.5 : prev + (p - prev) / 2;
-      const peakY = numTasks === 1 ? 60 : 90 - ((i + 1) / numTasks) * 40; 
-      
-      mPath += `${peakX * 100},${peakY} ${p * 100},100 `;
-    });
-    
     let cX = progress * 100;
-    let cY = 100;
+    if (cX > 100) cX = 100;
+    if (cX < 0) cX = 0;
     
-    let currentTaskIdx = timeline.findIndex(p => progress <= p);
-    if (currentTaskIdx === -1) currentTaskIdx = timeline.length - 1;
-    if (currentTaskIdx === -1) currentTaskIdx = 0;
-    
-    const p = timeline[currentTaskIdx];
-    const prev = currentTaskIdx === 0 ? 0 : timeline[currentTaskIdx - 1];
-    
-    const peakX = numTasks === 1 ? 0.5 : prev + (p - prev) / 2;
-    const startY = 100;
-    const peakY = numTasks === 1 ? 60 : 90 - ((currentTaskIdx + 1) / numTasks) * 40; 
+    let i = Math.floor(cX / segWidth);
+    if (i >= N) i = N - 1;
 
-    if (progress <= peakX) {
-        const seg = (progress - prev) / (peakX - prev || 1);
-        cY = startY - (seg * (startY - peakY));
+    const segmentStartX = i * segWidth;
+    const localX = cX - segmentStartX;
+    const halfSeg = segWidth / 2;
+    
+    let cY = 100;
+    if (localX <= halfSeg) {
+        cY = 100 - (localX / halfSeg) * 60;
     } else {
-        const seg = (progress - peakX) / (p - peakX || 1);
-        cY = peakY + (seg * (100 - peakY));
+        cY = 40 + ((localX - halfSeg) / halfSeg) * 60;
     }
 
-    return { mountainPath: mPath, climberX: cX, climberY: cY };
+    return { mountainPath: path, climberX: cX, climberY: cY };
   }, [progress, safeTimeline]);
 
   // SPACE: Planet Data with highly detailed inline SVGs
@@ -258,8 +244,8 @@ export const ProgressVisualizer: React.FC<ProgressVisualizerProps> = ({ mode, pr
             <polygon points="-20,100 30,50 80,100" fill="none" className="stroke-foreground/10" strokeWidth="0.2" />
             
             {/* Main Multi-Peak (maps to tasks) */}
-            <polygon 
-               points={`${mountainPath} 100,100 0,100`} 
+            <path 
+               d={`${mountainPath} Z`} 
                fill="url(#mountainFill)" 
                className="text-foreground stroke-foreground/40" 
                strokeWidth="0.5" 
@@ -267,14 +253,14 @@ export const ProgressVisualizer: React.FC<ProgressVisualizerProps> = ({ mode, pr
             />
           </svg>
 
-          {/* The Climber: Precision tracking dot */}
+          {/* The Climber: Person Icon */}
           <motion.div
-            className="absolute w-3 h-3 -ml-1.5 -mt-1.5 bg-background border border-foreground/50 rounded-full shadow-[0_0_15px_rgba(var(--foreground),1)] flex items-center justify-center"
+            className="absolute -ml-3 -mt-4 text-foreground flex items-center justify-center drop-shadow-[0_0_8px_rgba(var(--foreground),0.8)]"
             initial={{ left: "0%", top: "100%" }}
             animate={{ left: `${climberX}%`, top: `${climberY}%` }}
             transition={{ ease: "linear", duration: 1 }}
           >
-            <div className="w-1.5 h-1.5 bg-foreground rounded-full" />
+            <User className="w-6 h-6" />
           </motion.div>
         </div>
       </div>

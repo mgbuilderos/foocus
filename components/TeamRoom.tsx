@@ -22,6 +22,9 @@ export const TeamRoom = ({ roomId }: { roomId: string }) => {
       const data = JSON.parse(e.data);
       if (data.type === 'SYNC_PEERS') {
         setPeers(data.peers);
+      } else if (data.type === 'ROOM_RENAMED') {
+        setActiveRoomId(data.newRoomId);
+        window.history.replaceState(null, "", `?room=${data.newRoomId}`);
       }
     }
   });
@@ -53,8 +56,10 @@ export const TeamRoom = ({ roomId }: { roomId: string }) => {
   const handleRename = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (inputValue.trim()) {
-      setActiveRoomId(inputValue.trim());
-      window.history.replaceState(null, "", `?room=${inputValue.trim()}`);
+      const newRoomId = inputValue.trim();
+      socket.send(JSON.stringify({ type: 'ROOM_RENAMED', newRoomId }));
+      setActiveRoomId(newRoomId);
+      window.history.replaceState(null, "", `?room=${newRoomId}`);
     } else {
       setInputValue(activeRoomId);
     }
