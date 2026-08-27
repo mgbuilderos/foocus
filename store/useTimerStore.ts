@@ -27,6 +27,7 @@ interface TimerStore {
   currentTaskIndex: number;
   currentSubtaskIndex: number;
   endTime: number | null; // The absolute Unix timestamp when the current task should end
+  pausedRemainingSec: number | null; // Keeps track of time when paused
   isMuted: boolean;
   isCompactMode: boolean;
   visualizerMode: 'CLOCK' | 'SPACE' | 'MOUNTAIN';
@@ -43,8 +44,8 @@ interface TimerStore {
   removeTask: (id: string) => void;
   
   startSprint: () => void;
-  pauseSprint: (remainingSec: number) => void; // Need remaining seconds to recalculate endTime on resume
-  resumeSprint: (remainingSec: number) => void;
+  pauseSprint: () => void; 
+  resumeSprint: () => void;
   
   tick: () => void; // Called by worker/component to check if time is up
   finishTaskEarly: (elapsedSec: number) => void; // Triggers time redistribution
@@ -73,6 +74,7 @@ export const useTimerStore = create<TimerStore>()(
       currentTaskIndex: 0,
       currentSubtaskIndex: 0,
       endTime: null,
+      pausedRemainingSec: null,
       isMuted: false,
       isCompactMode: false,
       toggleCompactMode: () => set(state => ({ isCompactMode: !state.isCompactMode })),
@@ -133,6 +135,7 @@ export const useTimerStore = create<TimerStore>()(
           currentTaskIndex: 0,
           currentSubtaskIndex: 0,
           endTime: null,
+          pausedRemainingSec: null,
           wizardStep: 'GOAL',
           mainGoalTitle: '',
         });
@@ -187,7 +190,8 @@ export const useTimerStore = create<TimerStore>()(
     
     set({ 
       state: 'BREATHING', 
-      endTime: null 
+      endTime: null,
+      pausedRemainingSec: null
     });
 
     breathingTimeout = setTimeout(() => {
@@ -201,18 +205,24 @@ export const useTimerStore = create<TimerStore>()(
     }, 2000);
   },
 
-  pauseSprint: (remainingSec) => {
+  pauseSprint: () => {
+    const { endTime, state } = get();
+    if (state !== 'RUNNING' || !endTime) return;
+    const remainingSec = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
     if (breathingTimeout) {
       clearTimeout(breathingTimeout);
       breathingTimeout = null;
     }
-    set({ state: 'PAUSED', endTime: null });
+    set({ state: 'PAUSED', endTime: null, pausedRemainingSec: remainingSec });
   },
 
-  resumeSprint: (remainingSec) => {
+  resumeSprint: () => {
+    const { pausedRemainingSec } = get();
+    if (pausedRemainingSec == null) return;
     set({ 
       state: 'RUNNING', 
-      endTime: Date.now() + remainingSec * 1000 
+      endTime: Date.now() + pausedRemainingSec * 1000,
+      pausedRemainingSec: null
     });
   },
 
@@ -227,6 +237,7 @@ export const useTimerStore = create<TimerStore>()(
 
   completeCurrentTask: () => {
     const { tasks, currentTaskIndex, currentSubtaskIndex } = get();
+    if (tasks.length === 0 || currentTaskIndex >= tasks.length) return;
     
     const updatedTasks = [...tasks];
     const currentTask = { ...updatedTasks[currentTaskIndex] };
@@ -291,6 +302,7 @@ export const useTimerStore = create<TimerStore>()(
 
   finishTaskEarly: (elapsedSec) => {
     const { tasks, currentTaskIndex, currentSubtaskIndex } = get();
+    if (tasks.length === 0 || currentTaskIndex >= tasks.length) return;
     const currentTask = tasks[currentTaskIndex];
     
     let duration = currentTask.durationSec;

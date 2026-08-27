@@ -111,6 +111,8 @@ export const TimerStage = () => {
         setRemainingSec(sec);
       } else if (state === 'IDLE' && currentTask) {
         setRemainingSec(currentTask.durationSec);
+      } else if (state === 'PAUSED' && useTimerStore.getState().pausedRemainingSec != null) {
+        setRemainingSec(useTimerStore.getState().pausedRemainingSec!);
       }
       frameId = requestAnimationFrame(updateLocalTimer);
     };
@@ -124,16 +126,16 @@ export const TimerStage = () => {
       if (e.code === 'Space' && (e.target as HTMLElement).tagName !== 'INPUT') {
         e.preventDefault();
         if (state === 'IDLE' || state === 'PAUSED') {
-          if (state === 'PAUSED') resumeSprint(remainingSec);
+          if (state === 'PAUSED') resumeSprint();
           else startSprint();
         } else if (state === 'RUNNING') {
-          pauseSprint(remainingSec);
+          pauseSprint();
         }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state, remainingSec, startSprint, pauseSprint, resumeSprint]);
+  }, [state, startSprint, pauseSprint, resumeSprint]);
 
   if (state === 'IDLE') return null;
   if (state === 'BREATHING') {
@@ -295,8 +297,8 @@ export const TimerStage = () => {
         <div className="flex items-center justify-end space-x-2 z-10 w-1/3">
           <button 
             onClick={() => {
-              if (state === 'PAUSED') resumeSprint(remainingSec);
-              else if (state === 'RUNNING') pauseSprint(remainingSec);
+              if (state === 'PAUSED') resumeSprint();
+              else if (state === 'RUNNING') pauseSprint();
             }}
             className="neu-pressed w-8 h-8 rounded-full transition-all flex items-center justify-center group focus-visible:outline-none"
           >
@@ -306,7 +308,10 @@ export const TimerStage = () => {
             }
           </button>
           <button 
-             onClick={() => finishTaskEarly(currentTask ? (currentTask.durationSec - remainingSec) : 0)}
+             onClick={() => {
+                const duration = currentTask?.subtasks && currentTask.subtasks.length > 0 ? currentTask.subtasks[currentSubtaskIndex].durationSec : (currentTask?.durationSec || 0);
+                finishTaskEarly(Math.max(0, duration - remainingSec));
+             }}
              className="neu-flat w-8 h-8 rounded-full flex items-center justify-center text-foreground/50 hover:text-foreground focus-visible:outline-none"
           >
              <FastForward className="w-3 h-3" />
@@ -448,9 +453,9 @@ export const TimerStage = () => {
         <button 
           onClick={() => {
             if (state === 'PAUSED') {
-              resumeSprint(remainingSec);
+              resumeSprint();
             } else if (state === 'RUNNING') {
-              pauseSprint(remainingSec);
+              pauseSprint();
             }
           }}
           className="neu-pressed w-20 h-20 rounded-full transition-all flex items-center justify-center group focus-visible:ring-2 focus-visible:ring-foreground/50 focus-visible:outline-none"
@@ -469,8 +474,8 @@ export const TimerStage = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               onClick={() => {
-                const elapsed = currentTask.durationSec - remainingSec;
-                finishTaskEarly(elapsed);
+                const duration = currentTask?.subtasks && currentTask.subtasks.length > 0 ? currentTask.subtasks[currentSubtaskIndex].durationSec : (currentTask?.durationSec || 0);
+                finishTaskEarly(Math.max(0, duration - remainingSec));
               }}
               className="neu-flat flex flex-col items-center justify-center w-16 h-16 rounded-full transition-all text-foreground/50 hover:text-foreground focus-visible:ring-2 focus-visible:ring-foreground/50 focus-visible:outline-none"
               aria-label="Finish task early"

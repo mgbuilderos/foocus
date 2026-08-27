@@ -58,10 +58,13 @@ export const TaskBuilder = () => {
 
   const removeSubtask = (taskId: string, subtaskIndex: number) => {
     const updatedTasks = [...tasks];
-    const task = updatedTasks.find(t => t.id === taskId);
-    if (task && task.subtasks) {
+    const taskIndex = updatedTasks.findIndex(t => t.id === taskId);
+    if (taskIndex !== -1) {
+      const task = { ...updatedTasks[taskIndex] };
+      task.subtasks = [...(task.subtasks || [])];
       task.subtasks.splice(subtaskIndex, 1);
       task.durationSec = task.subtasks.reduce((sum, st) => sum + st.durationSec, 0);
+      updatedTasks[taskIndex] = task;
       setTasks(updatedTasks);
     }
   };
