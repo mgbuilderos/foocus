@@ -8,6 +8,7 @@ import {
   SITE_TAGLINE,
   SITE_URL,
 } from "./_lib/site";
+import { CSPostHogProvider } from "./providers";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -103,9 +104,12 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} bg-background text-foreground min-h-screen font-sans antialiased selection:bg-foreground/10 transition-colors duration-500`}>
         <ThemeProvider attribute="class" defaultTheme="dark">
-          {children}
+          <CSPostHogProvider>
+            {children}
+          </CSPostHogProvider>
         </ThemeProvider>
       </body>
+
     </html>
   );
 }
