@@ -28,14 +28,89 @@ export interface TelemetryStats {
 
 const STORAGE_KEY = 'foocus-telemetry';
 
+// ────────────────────────────────────────────────────────────────────────────
+// Shape validation
+//
+// `localStorage` is user- (and extension-) writable. `JSON.parse` succeeding says
+// nothing about the value being the array of records this module expects: setting
+// `foocus-telemetry` to `"123"` used to make `getSessions()` return the number 123,
+// so `getStats()`'s `.filter` threw and /admin white-screened (there is no
+// app/error.tsx). Everything read back is validated; junk is discarded, not thrown.
+// ────────────────────────────────────────────────────────────────────────────
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.length > 0;
+}
+
+function isIsoTimestamp(value: unknown): value is string {
+  return isNonEmptyString(value) && !Number.isNaN(new Date(value).getTime());
+}
+
+function sanitizeTask(raw: unknown): TelemetryTask | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const task = raw as Record<string, unknown>;
+  return {
+    title: typeof task.title === 'string' ? task.title : '',
+    durationSec: isFiniteNumber(task.durationSec) ? Math.max(0, task.durationSec) : 0,
+    completed: task.completed === true,
+  };
+}
+
+function sanitizeSession(raw: unknown): SprintSession | null {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const session = raw as Record<string, unknown>;
+
+  // A record without a usable identity, timestamp, duration or status cannot be
+  // rendered or aggregated — drop it rather than let it poison every metric.
+  if (!isNonEmptyString(session.id)) return null;
+  if (!isIsoTimestamp(session.completedAt)) return null;
+  if (!isFiniteNumber(session.totalDurationSec)) return null;
+  if (session.status !== 'completed' && session.status !== 'abandoned') return null;
+
+  const tasks = Array.isArray(session.tasks)
+    ? session.tasks
+        .map(sanitizeTask)
+        .filter((task): task is TelemetryTask => task !== null)
+    : [];
+
+  return {
+    id: session.id,
+    startedAt: isIsoTimestamp(session.startedAt) ? session.startedAt : session.completedAt,
+    completedAt: session.completedAt,
+    totalDurationSec: Math.max(0, session.totalDurationSec),
+    tasks,
+    status: session.status,
+  };
+}
+
 function getSessions(): SprintSession[] {
   if (typeof window === 'undefined') return [];
+
+  let raw: string | null;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    raw = localStorage.getItem(STORAGE_KEY);
   } catch {
     return [];
   }
+  if (!raw) return [];
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return [];
+  }
+
+  // `JSON.parse` happily returns numbers, strings, objects and null.
+  if (!Array.isArray(parsed)) return [];
+
+  return parsed
+    .map(sanitizeSession)
+    .filter((session): session is SprintSession => session !== null);
 }
 
 function setSessions(sessions: SprintSession[]): void {
@@ -49,10 +124,13 @@ function setSessions(sessions: SprintSession[]): void {
 
 export function saveSession(session: Omit<SprintSession, 'id'>): void {
   const sessions = getSessions();
-  const newSession: SprintSession = {
+  const candidate = {
     ...session,
     id: Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 8),
   };
+  // Never write a record that our own reader would have to discard.
+  const newSession = sanitizeSession(candidate);
+  if (!newSession) return;
   sessions.push(newSession);
   setSessions(sessions);
 }
@@ -88,5 +166,10 @@ export function getStats(): TelemetryStats {
 
 export function clearAllSessions(): void {
   if (typeof window === 'undefined') return;
-  localStorage.removeItem(STORAGE_KEY);
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Safari private mode / disabled site data — must not throw out of the
+    // "Yes, Delete" click handler into an app with no error boundary.
+  }
 }

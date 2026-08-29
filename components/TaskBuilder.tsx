@@ -7,6 +7,18 @@ import { ArrowRight, Plus, X } from 'lucide-react';
 
 type WizardStep = 'GOAL' | 'SUBTASKS' | 'READY';
 
+/**
+ * Shared, on-brand focus treatment. Neumorphic surfaces have almost no edge contrast,
+ * so a bare ring can disappear into the shadow — the offset lifts it clear.
+ * Spelled out in full (not composed) so Tailwind's content scanner sees every class.
+ */
+const FOCUS_RING =
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background';
+
+/** The subtask duration input advertises min="1" max="120"; every code path must honour it. */
+const MIN_SUBTASK_MINUTES = 1;
+const MAX_SUBTASK_MINUTES = 120;
+
 export const TaskBuilder = () => {
   const { tasks, addTask, addSubtask, removeTask, state, setTasks, startSprint, wizardStep: step, setWizardStep: setStep } = useTimerStore();
   const [mainGoal, setMainGoal] = useState('');
@@ -43,11 +55,24 @@ export const TaskBuilder = () => {
     setStep('SUBTASKS');
   };
 
+  /**
+   * Single source of truth for the duration field. Returns minutes clamped to the same
+   * bounds the <input> declares, and writes the clamped value back so the user can see
+   * what was actually accepted instead of silently getting something else.
+   */
+  const readSubtaskMinutes = (): number | null => {
+    const parsed = parseInt(subtaskDuration, 10);
+    if (isNaN(parsed)) return null;
+    const clamped = Math.min(MAX_SUBTASK_MINUTES, Math.max(MIN_SUBTASK_MINUTES, parsed));
+    if (clamped !== parsed) setSubtaskDuration(String(clamped));
+    return clamped;
+  };
+
   const handleAddSubtask = (e: React.FormEvent) => {
     e.preventDefault();
     if (!subtaskTitle.trim()) return;
-    const dur = parseInt(subtaskDuration, 10);
-    if (isNaN(dur) || dur <= 0) return;
+    const dur = readSubtaskMinutes();
+    if (dur === null) return;
     
     const mainTaskId = tasks[0]?.id;
     if (mainTaskId) {
@@ -138,7 +163,7 @@ export const TaskBuilder = () => {
               <button 
                 type="submit"
                 disabled={!mainGoal.trim()}
-                className="ml-2 w-10 h-10 rounded-xl bg-foreground text-background flex items-center justify-center opacity-0 group-focus-within:opacity-100 disabled:opacity-0 transition-all duration-500 translate-x-4 group-focus-within:translate-x-0 disabled:translate-x-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/50 shadow-md"
+                className={`ml-2 w-10 h-10 rounded-xl bg-foreground text-background flex items-center justify-center opacity-0 group-focus-within:opacity-100 disabled:opacity-0 transition-all duration-500 translate-x-4 group-focus-within:translate-x-0 disabled:translate-x-4 shadow-md ${FOCUS_RING}`}
               >
                 <ArrowRight className="w-5 h-5" />
               </button>
@@ -166,7 +191,7 @@ export const TaskBuilder = () => {
 
             <div className="w-full max-w-lg space-y-4">
               <form onSubmit={handleAddSubtask} className="neu-pressed flex items-center p-2 rounded-xl">
-                <button type="submit" aria-label="Add subtask" className="p-2 ml-1 text-foreground/40 hover:text-foreground transition-colors focus-visible:outline-none">
+                <button type="submit" aria-label="Add subtask" className={`p-2 ml-1 rounded-lg text-foreground/40 hover:text-foreground transition-colors ${FOCUS_RING}`}>
                   <Plus className="w-5 h-5" />
                 </button>
                 <input 
@@ -175,7 +200,7 @@ export const TaskBuilder = () => {
                   onChange={(e) => setSubtaskTitle(e.target.value)}
                   placeholder="Add a subtask... (press Enter)"
                   aria-label="Subtask Title"
-                  className="flex-1 bg-transparent border-0 outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 rounded-lg text-foreground placeholder:text-foreground/30 font-sans px-2 py-2"
+                  className={`flex-1 bg-transparent border-0 outline-none rounded-lg text-foreground placeholder:text-foreground/30 font-sans px-2 py-2 ${FOCUS_RING}`}
                   autoFocus
                 />
                 <div className="flex shrink-0 items-center gap-1 pr-2">
@@ -185,13 +210,13 @@ export const TaskBuilder = () => {
                     onChange={(e) => setSubtaskDuration(e.target.value)}
                     min="1"
                     max="120"
-                    className="w-16 bg-transparent border-0 outline-none focus:outline-none focus:ring-0 text-foreground font-sans text-right px-1 py-2 text-sm"
+                    className={`w-16 bg-transparent border-0 outline-none rounded-lg text-foreground font-sans text-right px-1 py-2 text-sm ${FOCUS_RING}`}
                     aria-label="Subtask Duration (minutes)"
                   />
                   <span className="text-foreground/50 text-sm mr-2">minutes</span>
                   <button 
                     type="submit"
-                    className="neu-flat text-[10px] uppercase tracking-widest text-foreground/70 hover:text-foreground px-3 py-2 rounded-lg transition-colors focus-visible:outline-none"
+                    className={`neu-flat text-[10px] uppercase tracking-widest text-foreground/70 hover:text-foreground px-3 py-2 rounded-lg transition-colors ${FOCUS_RING}`}
                   >
                     Add
                   </button>
@@ -212,8 +237,10 @@ export const TaskBuilder = () => {
                         {Math.floor(st.durationSec / 60)} minutes
                       </span>
                       <button 
+                        type="button"
                         onClick={() => removeSubtask(mainTask.id, idx)}
-                        className="text-foreground/30 hover:text-foreground transition-colors p-1"
+                        aria-label={`Remove subtask: ${st.title}`}
+                        className={`text-foreground/30 hover:text-foreground transition-colors p-1 rounded-md ${FOCUS_RING}`}
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -225,11 +252,14 @@ export const TaskBuilder = () => {
 
             <div className="pt-8">
               <button 
-                onClick={(e) => {
-                  // If there is text in the input but they clicked Continue, auto-add it first
+                type="button"
+                onClick={() => {
+                  // If there is text in the input but they clicked Continue, auto-add it first.
+                  // Goes through readSubtaskMinutes so this path obeys the same 1-120 bound
+                  // as the form: previously `dur > 0` let a typed 99999 through unclamped.
                   if (subtaskTitle.trim() && mainTask) {
-                    const dur = parseInt(subtaskDuration, 10);
-                    if (!isNaN(dur) && dur > 0) {
+                    const dur = readSubtaskMinutes();
+                    if (dur !== null) {
                       addSubtask(mainTask.id, { title: subtaskTitle, durationSec: dur * 60 });
                       setSubtaskTitle('');
                     }
@@ -237,7 +267,7 @@ export const TaskBuilder = () => {
                   setStep('READY');
                 }}
                 disabled={(!mainTask?.subtasks?.length && !subtaskTitle.trim())}
-                className="neu-flat px-8 py-3 rounded-full text-sm uppercase tracking-widest hover:text-foreground transition-colors focus-visible:outline-none disabled:opacity-50"
+                className={`neu-flat px-8 py-3 rounded-full text-sm uppercase tracking-widest hover:text-foreground transition-colors disabled:opacity-50 ${FOCUS_RING}`}
               >
                 Continue
               </button>
@@ -263,14 +293,14 @@ export const TaskBuilder = () => {
             
             <button 
               onClick={startSprint}
-              className="neu-flat px-10 py-4 rounded-full text-sm uppercase tracking-widest text-foreground/80 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/50"
+              className={`neu-flat px-10 py-4 rounded-full text-sm uppercase tracking-widest text-foreground/80 hover:text-foreground transition-colors ${FOCUS_RING}`}
             >
               Begin Sprint
             </button>
             
             <button 
               onClick={() => setStep('SUBTASKS')}
-              className="text-xs uppercase tracking-widest text-foreground/40 hover:text-foreground/70 transition-colors mt-4"
+              className={`text-xs uppercase tracking-widest text-foreground/40 hover:text-foreground/70 transition-colors mt-4 rounded-full px-3 py-1.5 ${FOCUS_RING}`}
             >
               Back to Subtasks
             </button>

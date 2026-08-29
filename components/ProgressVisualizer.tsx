@@ -165,7 +165,7 @@ export const ProgressVisualizer: React.FC<ProgressVisualizerProps> = ({ mode, pr
               width: planets[0].size, 
               height: planets[0].size, 
               marginLeft: -(planets[0].size/2),
-              boxShadow: `0 0 20px rgba(var(--foreground),0.2)`
+              boxShadow: `0 0 20px rgb(var(--foreground) / 0.2)`
             }}
             animate={{ rotate: 360 }}
             transition={{ repeat: Infinity, duration: 60, ease: "linear" }}
@@ -185,7 +185,7 @@ export const ProgressVisualizer: React.FC<ProgressVisualizerProps> = ({ mode, pr
                    width: planet.size, 
                    height: planet.size, 
                    marginLeft: -(planet.size/2),
-                   boxShadow: `0 0 20px rgba(var(--foreground),0.2)`
+                   boxShadow: `0 0 20px rgb(var(--foreground) / 0.2)`
                  }}
                  animate={{ rotate: 360 }}
                  transition={{ repeat: Infinity, duration: 80 + (i * 20), ease: "linear" }}
@@ -212,7 +212,7 @@ export const ProgressVisualizer: React.FC<ProgressVisualizerProps> = ({ mode, pr
             {/* Highly detailed Rocket SVG */}
             <svg width="36" height="36" viewBox="0 0 32 32" fill="none" className="text-foreground rotate-45 relative z-10 drop-shadow-[0_0_8px_currentColor]">
               <path d="M18.8 4.2C15.6 2 11.2 2 11.2 2s-.5 4.7-1.1 7.1L4.8 11.5c-2.3.9-3.7 2.1-3.7 2.1s2 1.7 5.2 2.7l-3.1 3.1c-1.3 1.3-1.3 3.3 0 4.5 1.3 1.3 3.3 1.3 4.5 0l3.1-3.1c1.1 3.2 2.7 5.2 2.7 5.2s1.2-1.4 2.1-3.7l2.4-5.3c2.4-.6 7.1-1.1 7.1-1.1s0-4.4-2.2-7.6c-2-3-6-4.1-6-4.1z" fill="currentColor" opacity="0.8"/>
-              <path d="M15.5 11c-1.4 0-2.5-1.1-2.5-2.5S14.1 6 15.5 6 18 7.1 18 8.5 16.9 11 15.5 11z" fill="var(--background)" />
+              <path d="M15.5 11c-1.4 0-2.5-1.1-2.5-2.5S14.1 6 15.5 6 18 7.1 18 8.5 16.9 11 15.5 11z" fill="rgb(var(--background))" />
               <path d="M15.5 8.5c-.6 0-1 .4-1 1s.4 1 1 1 1-.4 1-1-.4-1-1-1z" fill="currentColor" />
               <path d="M8 21.5l-2.5 2.5 1.5 1.5L9.5 23 8 21.5z" fill="currentColor" opacity="0.6"/>
             </svg>
@@ -255,7 +255,7 @@ export const ProgressVisualizer: React.FC<ProgressVisualizerProps> = ({ mode, pr
 
           {/* The Climber: Person Icon */}
           <motion.div
-            className="absolute -ml-3 -mt-4 text-foreground flex items-center justify-center drop-shadow-[0_0_8px_rgba(var(--foreground),0.8)]"
+            className="absolute -ml-3 -mt-4 text-foreground flex items-center justify-center drop-shadow-[0_0_8px_rgb(var(--foreground)_/_0.8)]"
             initial={{ left: "0%", top: "100%" }}
             animate={{ left: `${climberX}%`, top: `${climberY}%` }}
             transition={{ ease: "linear", duration: 1 }}
@@ -292,7 +292,7 @@ export const ProgressVisualizer: React.FC<ProgressVisualizerProps> = ({ mode, pr
           animate={{ left: `calc(5% + ${progress * 90}%)` }}
           transition={{ ease: "linear", duration: 1 }}
         >
-          <div className="relative flex items-center justify-center -ml-3 drop-shadow-[0_0_10px_rgba(var(--foreground),0.3)]">
+          <div className="relative flex items-center justify-center -ml-3 drop-shadow-[0_0_10px_rgb(var(--foreground)_/_0.3)]">
             <svg viewBox="0 0 24 24" className="w-8 h-8 fill-foreground">
               <path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7" />
             </svg>

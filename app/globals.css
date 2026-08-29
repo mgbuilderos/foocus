@@ -4,9 +4,11 @@
 
 @layer base {
   :root {
-    --background: #e0e5ec;
-    --foreground: #1a1b1f;
-    --card: #e0e5ec;
+    /* Space-separated RGB channels so Tailwind's <alpha-value> modifier works.
+       224 229 236 == #e0e5ec  |  26 27 31 == #1a1b1f */
+    --background: 224 229 236;
+    --foreground: 26 27 31;
+    --card: 224 229 236;
     --shadow-light: 9px 9px 16px rgba(163, 177, 198, 0.6), -9px -9px 16px rgba(255, 255, 255, 0.5);
     --shadow-inset: inset 6px 6px 10px 0 rgba(163, 177, 198, 0.7), inset -6px -6px 10px 0 rgba(255, 255, 255, 0.8);
     --mesh-bg: radial-gradient(at 0% 0%, #ffffff 0px, transparent 50%),
@@ -16,9 +18,9 @@
                #e8edf3;
   }
   .dark {
-    --background: #1a1b1f;
-    --foreground: #e0e5ec;
-    --card: #1a1b1f;
+    --background: 26 27 31;
+    --foreground: 224 229 236;
+    --card: 26 27 31;
     --shadow-light: 6px 6px 12px rgba(0, 0, 0, 0.6), -6px -6px 12px rgba(55, 58, 64, 0.15);
     --shadow-inset: inset 4px 4px 8px 0 rgba(0, 0, 0, 0.6), inset -4px -4px 8px 0 rgba(55, 58, 64, 0.2);
     --mesh-bg: radial-gradient(at 0% 0%, #1f2229 0px, transparent 50%),
@@ -29,13 +31,13 @@
   }
   body {
     background: var(--mesh-bg);
-    color: var(--foreground);
+    color: rgb(var(--foreground));
     transition: background 0.5s ease, color 0.5s ease;
   }
 }
 
 .neu-flat {
-  background-color: var(--background);
+  background-color: rgb(var(--background));
   box-shadow: var(--shadow-light);
 }
 
@@ -44,6 +46,6 @@
 }
 
 .neu-pressed {
-  background-color: var(--background);
+  background-color: rgb(var(--background));
   box-shadow: var(--shadow-inset);
 }
