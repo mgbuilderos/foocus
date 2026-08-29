@@ -27,29 +27,29 @@ export const AnalogueClock: React.FC<AnalogueClockProps> = ({ remainingSec, tota
           {/* CLASSIC WATCH FACE */}
           <>
               {/* Outer Rim */}
-              <circle cx="50" cy="50" r="48" fill="none" className="stroke-foreground/30" strokeWidth="0.5" />
-              <circle cx="50" cy="50" r="45" fill="none" className="stroke-foreground/30" strokeWidth="2" />
+              <circle cx="50" cy="50" r="48" fill="none" className="stroke-foreground/20" strokeWidth="0.2" />
+              <circle cx="50" cy="50" r="46" fill="none" className="stroke-foreground/20" strokeWidth="0.5" />
 
               {/* 12 Hour Ticks */}
               {Array.from({ length: 12 }).map((_, i) => (
                 <line
                   key={`h-${i}`}
-                  x1="50" y1="7" x2="50" y2="12"
-                  className="stroke-foreground/70"
-                  strokeWidth="1"
+                  x1="50" y1="6" x2="50" y2="10"
+                  className="stroke-foreground/60"
+                  strokeWidth="0.5"
                   strokeLinecap="round"
                   transform={`rotate(${i * 30} 50 50)`}
                 />
               ))}
 
-              {/* 60 Minute Dots (Fixed: larger and better positioned) */}
+              {/* 60 Minute Dots */}
               {Array.from({ length: 60 }).map((_, i) => {
                 if (i % 5 === 0) return null; // skip hour ticks
                 return (
                   <circle
                     key={`m-${i}`}
-                    cx="50" cy="8" r="0.8"
-                    className="fill-foreground/50"
+                    cx="50" cy="8" r="0.3"
+                    className="fill-foreground/40"
                     transform={`rotate(${i * 6} 50 50)`}
                   />
                 );
@@ -59,7 +59,7 @@ export const AnalogueClock: React.FC<AnalogueClockProps> = ({ remainingSec, tota
               <motion.line
                 x1="50" y1="50" x2="50" y2="28"
                 className="stroke-foreground"
-                strokeWidth="2.5"
+                strokeWidth="1.2"
                 strokeLinecap="round"
                 style={{ transformOrigin: '50px 50px' }}
                 animate={{ rotate: hourDegrees }}
@@ -70,7 +70,7 @@ export const AnalogueClock: React.FC<AnalogueClockProps> = ({ remainingSec, tota
               <motion.line
                 x1="50" y1="50" x2="50" y2="16"
                 className="stroke-foreground/80"
-                strokeWidth="1.5"
+                strokeWidth="0.8"
                 strokeLinecap="round"
                 style={{ transformOrigin: '50px 50px' }}
                 animate={{ rotate: minDegrees }}
@@ -81,7 +81,7 @@ export const AnalogueClock: React.FC<AnalogueClockProps> = ({ remainingSec, tota
               <motion.line
                 x1="50" y1="58" x2="50" y2="12"
                 className="stroke-foreground"
-                strokeWidth="0.5"
+                strokeWidth="0.3"
                 strokeLinecap="round"
                 style={{ transformOrigin: '50px 50px' }}
                 animate={{ rotate: secDegrees }}
@@ -89,8 +89,8 @@ export const AnalogueClock: React.FC<AnalogueClockProps> = ({ remainingSec, tota
               />
 
               {/* Center Pin */}
-              <circle cx="50" cy="50" r="2" className="fill-background stroke-foreground" strokeWidth="1" />
-              <circle cx="50" cy="50" r="0.5" className="fill-foreground" />
+              <circle cx="50" cy="50" r="1.5" className="fill-background stroke-foreground" strokeWidth="0.5" />
+              <circle cx="50" cy="50" r="0.4" className="fill-foreground" />
             </>
         </svg>
       </div>

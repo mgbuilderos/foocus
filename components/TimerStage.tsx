@@ -554,10 +554,10 @@ export const TimerStage = () => {
       >
         {/* Escape Hatch: Restart */}
         <div className="absolute top-0 left-0 w-full flex justify-center pointer-events-none z-50">
-          <div className="w-full max-w-2xl flex justify-between items-center relative pointer-events-auto">
+          <div className="w-full max-w-2xl flex justify-between items-center relative">
             <button
               onClick={() => resetSprint()}
-              className={`text-[10px] uppercase tracking-widest text-foreground/60 hover:text-foreground px-3 py-1.5 border border-foreground/10 hover:border-foreground/30 rounded-full transition-all bg-foreground/5 hover:bg-foreground/10 backdrop-blur-md ${FOCUS_RING}`}
+              className={`pointer-events-auto text-[10px] uppercase tracking-widest text-foreground/60 hover:text-foreground px-3 py-1.5 border border-foreground/10 hover:border-foreground/30 rounded-full transition-all bg-foreground/5 hover:bg-foreground/10 backdrop-blur-md ${FOCUS_RING}`}
             >
               ← Restart
             </button>
@@ -594,12 +594,12 @@ export const TimerStage = () => {
 
         {/* Top Toggles */}
         <div className="absolute top-0 left-0 w-full flex justify-center pointer-events-none z-50">
-          <div className="w-full max-w-2xl flex justify-end items-center relative pointer-events-auto">
+          <div className="w-full max-w-2xl flex justify-end items-center relative">
             <motion.div 
               animate={{ opacity: state === 'RUNNING' && isIdle ? 0.05 : 0.4 }}
               whileHover={{ opacity: 1 }}
               transition={{ duration: 1 }}
-              className="flex items-center space-x-2 scale-90 origin-top-right transition-opacity"
+              className="pointer-events-auto flex items-center space-x-2 scale-90 origin-top-right transition-opacity"
             >
           <button
             onClick={toggleCompactMode}

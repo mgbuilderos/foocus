@@ -29,7 +29,7 @@ export const ProgressVisualizer: React.FC<ProgressVisualizerProps> = ({ mode, pr
 
   // MOUNTAIN: Escalating Multi-peak generation with centered single peak
   const { mountainPath, climberX, climberY } = useMemo(() => {
-    const N = Math.max(1, safeTimeline.length);
+    const N = Math.max(1, timelinePoints.length + 1);
     const segWidth = 100 / N;
     let path = 'M 0,100 ';
     for(let i=0; i<N; i++) {
@@ -55,7 +55,7 @@ export const ProgressVisualizer: React.FC<ProgressVisualizerProps> = ({ mode, pr
     }
 
     return { mountainPath: path, climberX: cX, climberY: cY };
-  }, [progress, safeTimeline]);
+  }, [progress, timelinePoints]);
 
   // SPACE: Planet Data with highly detailed inline SVGs
   const planets = [
@@ -203,18 +203,23 @@ export const ProgressVisualizer: React.FC<ProgressVisualizerProps> = ({ mode, pr
           animate={{ left: `calc(5% + ${progress * 90}%)` }}
           transition={{ ease: "linear", duration: 1 }}
         >
-          <div className="relative flex items-center justify-center -translate-y-1/2 drop-shadow-[0_0_15px_currentColor]">
+          <div className="relative flex items-center justify-center -translate-y-1/2 dark:drop-shadow-[0_0_15px_currentColor] drop-shadow-md">
             <motion.div 
               className="absolute right-[80%] top-1/2 -translate-y-1/2 h-[3px] bg-gradient-to-r from-transparent via-cyan-400 to-white blur-[1px] rounded-full"
               animate={{ width: [30, 50, 30], opacity: [0.6, 1, 0.6] }}
               transition={{ repeat: Infinity, duration: 0.2 }}
             />
-            {/* Highly detailed Rocket SVG */}
-            <svg width="36" height="36" viewBox="0 0 32 32" fill="none" className="text-foreground rotate-45 relative z-10 drop-shadow-[0_0_8px_currentColor]">
-              <path d="M18.8 4.2C15.6 2 11.2 2 11.2 2s-.5 4.7-1.1 7.1L4.8 11.5c-2.3.9-3.7 2.1-3.7 2.1s2 1.7 5.2 2.7l-3.1 3.1c-1.3 1.3-1.3 3.3 0 4.5 1.3 1.3 3.3 1.3 4.5 0l3.1-3.1c1.1 3.2 2.7 5.2 2.7 5.2s1.2-1.4 2.1-3.7l2.4-5.3c2.4-.6 7.1-1.1 7.1-1.1s0-4.4-2.2-7.6c-2-3-6-4.1-6-4.1z" fill="currentColor" opacity="0.8"/>
-              <path d="M15.5 11c-1.4 0-2.5-1.1-2.5-2.5S14.1 6 15.5 6 18 7.1 18 8.5 16.9 11 15.5 11z" fill="rgb(var(--background))" />
-              <path d="M15.5 8.5c-.6 0-1 .4-1 1s.4 1 1 1 1-.4 1-1-.4-1-1-1z" fill="currentColor" />
-              <path d="M8 21.5l-2.5 2.5 1.5 1.5L9.5 23 8 21.5z" fill="currentColor" opacity="0.6"/>
+            {/* Minimalist Falcon 9 style Rocket */}
+            <svg width="36" height="36" viewBox="0 0 32 32" fill="none" className="text-foreground rotate-90 relative z-10 dark:drop-shadow-[0_0_8px_currentColor] drop-shadow-sm">
+              {/* Rocket Body */}
+              <path d="M16 2 C16 2 13 8 13 14 L13 26 L19 26 L19 14 C19 8 16 2 16 2 Z" fill="currentColor"/>
+              {/* Fins */}
+              <path d="M13 22 L9 28 L13 26 Z" fill="currentColor"/>
+              <path d="M19 22 L23 28 L19 26 Z" fill="currentColor"/>
+              {/* Engine Nozzle */}
+              <path d="M14 26 L18 26 L19 29 L13 29 Z" fill="currentColor" opacity="0.8"/>
+              {/* Detail line */}
+              <path d="M16 8 L16 20" stroke="rgb(var(--background))" strokeWidth="0.5" strokeLinecap="round" opacity="0.5"/>
             </svg>
           </div>
         </motion.div>
@@ -239,10 +244,6 @@ export const ProgressVisualizer: React.FC<ProgressVisualizerProps> = ({ mode, pr
               </linearGradient>
             </defs>
 
-            {/* Background Aesthetic Peaks */}
-            <polygon points="20,100 60,40 100,100" fill="none" className="stroke-foreground/10" strokeWidth="0.2" />
-            <polygon points="-20,100 30,50 80,100" fill="none" className="stroke-foreground/10" strokeWidth="0.2" />
-            
             {/* Main Multi-Peak (maps to tasks) */}
             <path 
                d={`${mountainPath} Z`} 
