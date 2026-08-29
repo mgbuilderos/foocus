@@ -79,6 +79,16 @@ export const TimerStage = () => {
   const [timeAnnouncement, setTimeAnnouncement] = useState('');
 
   const [stats, setStats] = useState<TelemetryStats | null>(null);
+  const [showDonation, setShowDonation] = useState(false);
+
+  useEffect(() => {
+    if (state === 'FINISHED') {
+      const id = setTimeout(() => setShowDonation(true), 3000);
+      return () => clearTimeout(id);
+    } else {
+      setShowDonation(false);
+    }
+  }, [state]);
 
   // Idle fade. Pointer events cover mouse, touch and pen in one listener; touchstart
   // is kept as a fallback for engines without pointer events, so a phone user can
@@ -422,6 +432,22 @@ export const TimerStage = () => {
           >
             Start New Sprint
           </button>
+
+          <AnimatePresence>
+            {showDonation && (
+              <motion.a
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1.5 }}
+                href="https://throne.com/foocus"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="fixed bottom-8 text-sm text-foreground/40 hover:text-foreground/80 transition-colors duration-500 font-sans tracking-wide"
+              >
+                Fuel the next sprint ☕
+              </motion.a>
+            )}
+          </AnimatePresence>
         </motion.div>
       </>
     );
